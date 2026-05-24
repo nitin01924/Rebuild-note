@@ -11,6 +11,10 @@ app.get("/", (req, res) => {
   res.send("Webapp Working");
 });
 
+app.get("/mac",(req,res)=>{
+  res.send("Working on Macbook.")
+})
+
 app.listen(port, async () => {
   await connectDB();
   console.log(`Server is running on port ${port}`);
