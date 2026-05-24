@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
   res.send("Webapp Working");
 });
 
-app.get("/mac",(req,res)=>{
+app.get("/macbook",(req,res)=>{
   res.send("Working on Macbook.")
 })
 
