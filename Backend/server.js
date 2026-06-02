@@ -6,6 +6,8 @@ import registerUser from "./controllers/authcontroller.js";
 dotenv.config();
 
 const app = express();
+app.use(express.json());
+
 const port = 3000;
 
 app.get("/", (req, res) => {

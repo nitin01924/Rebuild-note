@@ -14,6 +14,14 @@ const registerUser = async (req, res) => {
   }
   const normalizedEmail = email.toLowerCase();
 
+  const existingEmail = await User.findOne({ email: normalizedEmail });
+  if (existingEmail) {
+    return res.status(400).json({
+      success: false,
+      error: "User already exist.",
+    });
+  }
+
   const token = crypto.randomBytes(32).toString("hex");
   const user = await User.create({
     name,
