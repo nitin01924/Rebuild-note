@@ -1,6 +1,7 @@
 import express from "express";
 import connectDB from "./config/db.js";
 import dotenv from "dotenv";
+import registerUser from "./controllers/authcontroller.js";
 
 dotenv.config();
 
@@ -11,9 +12,7 @@ app.get("/", (req, res) => {
   res.send("Webapp Working");
 });
 
-app.get("/macbook",(req,res)=>{
-  res.send("Working on Macbook.")
-})
+app.post("/register", registerUser);
 
 app.listen(port, async () => {
   await connectDB();
