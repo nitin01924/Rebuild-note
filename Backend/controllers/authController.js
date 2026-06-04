@@ -1,10 +1,11 @@
 import express from "express";
 import User from "../models/User.js";
 import crypto from "crypto";
+import { toUSVString } from "util";
 
 const app = express();
 
-const registerUser = async (req, res) => {
+export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -42,4 +43,31 @@ const registerUser = async (req, res) => {
   }
 };
 
-export default registerUser;
+// =============Login===============
+
+export const LoginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter all credentials",
+      });
+    }
+
+    const enteredEmail = email;
+    const findUser = await User.findOne({ email: enteredEmail });
+    if (findUser) {
+      res.status(200).json({
+        success: true,
+        message: "User founded successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "User not found !!",
+      });
+    }
+  } catch (error) {}
+};
