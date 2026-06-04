@@ -69,5 +69,10 @@ export const LoginUser = async (req, res) => {
         message: "User not found !!",
       });
     }
-  } catch (error) {}
+  } catch (error) {
+  res.status(500).json({
+    success: false,
+    message: "Something went wrong with Server",
+  });
 };
+}
