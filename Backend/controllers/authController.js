@@ -56,23 +56,32 @@ export const LoginUser = async (req, res) => {
       });
     }
 
-    const enteredEmail = email;
-    const findUser = await User.findOne({ email: enteredEmail });
-    if (findUser) {
-      res.status(200).json({
-        success: true,
-        message: "User founded successfully",
-      });
-    } else {
+    const user = await User.findOne({ email }).select("+password");
+    
+    if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found !!",
       });
     }
+
+    const isPasswordMatched = await user.matchPassword(password);
+    if (!isPasswordMatched) {
+      res.status(401).json({ message: "Invalid email or password " });
+    }
+    res.status(201).json({
+      success: true,
+      message: "user has been logged-In",
+      data: {
+        name: user.name,
+        id: user._id,
+        email: user.email,
+      },
+    });
   } catch (error) {
-  res.status(500).json({
-    success: false,
-    message: "Something went wrong with Server",
-  });
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong with Server",
+    });
+  }
 };
-}
