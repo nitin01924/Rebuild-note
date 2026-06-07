@@ -2,6 +2,9 @@ import express from "express";
 import User from "../models/User.js";
 import crypto from "crypto";
 import { toUSVString } from "util";
+import generateToken from "../utils/generateToken.js";
+import { get } from "http";
+import asyncHandler from "../middlewares/asyncHandler.js";
 
 const app = express();
 
@@ -56,8 +59,11 @@ export const LoginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email }).select("+password");
-    
+    const normalizedEmail = email.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+password",
+    );
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -76,6 +82,7 @@ export const LoginUser = async (req, res) => {
         name: user.name,
         id: user._id,
         email: user.email,
+        token: generateToken(user._id),
       },
     });
   } catch (error) {
@@ -84,4 +91,10 @@ export const LoginUser = async (req, res) => {
       message: "Something went wrong with Server",
     });
   }
+};
+
+export const getMe = (req, res) => {
+  res.json({
+    user: req.user,
+  });
 };

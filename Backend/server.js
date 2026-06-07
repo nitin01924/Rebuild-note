@@ -1,7 +1,12 @@
 import express from "express";
 import connectDB from "./config/db.js";
 import dotenv from "dotenv";
-import { registerUser, LoginUser } from "./controllers/authcontroller.js";
+import {
+  registerUser,
+  LoginUser,
+  getMe,
+} from "./controllers/authcontroller.js";
+import protect from "./middlewares/authMiddleware.js";
 
 dotenv.config();
 
@@ -16,6 +21,7 @@ app.get("/", (req, res) => {
 
 app.post("/register", registerUser);
 app.post("/login", LoginUser);
+app.get("/me", protect, getMe);
 
 app.listen(port, async () => {
   await connectDB();
