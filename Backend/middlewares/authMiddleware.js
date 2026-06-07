@@ -1,11 +1,11 @@
-import User from "../models/User";
-import asyncHandler from "./asyncHandler";
+import User from "../models/User.js";
+import asyncHandler from "./asyncHandler.js";
 import jwt from "jsonwebtoken";
 
 const protect = asyncHandler(async (req, res, next) => {
-  const authHeader = req.Header.authentication;
+  const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startwith("Bearer")) {
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
     return res.status(401).json({
       success: false,
       message: "Not authorized or no token",
@@ -15,7 +15,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
   try {
     const decode = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findOne(decode.id);
+    const user = await User.findById(decode.id);
 
     if (!user) {
       return res.status(404).json({
@@ -30,3 +30,4 @@ const protect = asyncHandler(async (req, res, next) => {
     });
   }
 });
+export default protect;
