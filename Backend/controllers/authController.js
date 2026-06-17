@@ -98,3 +98,18 @@ export const getMe = (req, res) => {
     user: req.user,
   });
 };
+
+// ================= verify-email ============
+
+export const verify_email = asyncHandler(async (req, res, next) => {
+  const { token } = req.query;
+
+  const user = await User.findOne({ verificationToken: token });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found / token is invalid",
+    });
+  }
+});
