@@ -112,4 +112,18 @@ export const verify_email = asyncHandler(async (req, res, next) => {
       message: "User not found / token is invalid",
     });
   }
+  if (user.isVerified) {
+    return res.status(200).json({
+      success: true,
+      message: "User is already Verified",
+    });
+  }
+
+  ((user.isVerified = true), (user.verificationToken = null));
+
+  await user.save();
+  res.json({
+    success: true,
+    message: "Email verified successfully",
+  });
 });
