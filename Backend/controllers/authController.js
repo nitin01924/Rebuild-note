@@ -5,6 +5,7 @@ import { toUSVString } from "util";
 import generateToken from "../utils/generateToken.js";
 import { get } from "http";
 import asyncHandler from "../middlewares/asyncHandler.js";
+import { sendVerificationEmail } from "../utils/SendEmail.js";
 
 const app = express();
 
@@ -34,6 +35,10 @@ export const registerUser = async (req, res) => {
       password,
       verificationToken: token,
     });
+
+    // sending email to the user for verify the email
+    await sendVerificationEmail(user.email, token);
+
     res.status(201).json({
       success: true,
       message: "User has been Registered",
@@ -68,6 +73,13 @@ export const LoginUser = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "User not found !!",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(401).json({
+        success: false,
+        message: "User is not verified!",
       });
     }
 
