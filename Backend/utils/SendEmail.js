@@ -82,3 +82,82 @@ export const sendVerificationEmail = async (email, token) => {
     throw error;
   }
 };
+
+
+
+// !!==================== password-reset-email ====================!!
+//
+
+export const resetPasswordEmail = async (email, token) => {
+  const defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+  defaultClient.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
+
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+  try {
+    const verifyLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+    console.log(process.env.BREVO_API_KEY);
+    console.log("📨 Sending reset password verification email...");
+
+    await apiInstance.sendTransacEmail({
+      sender: {
+        name: "Notes App",
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+
+      to: [
+        {
+          email: email,
+        },
+      ],
+
+      subject: "Reset your password",
+
+      htmlContent: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        
+        <h2 style="color: #111;">Reset your password</h2>
+
+        <p>Hi,</p>
+
+        <p>
+          Welcome to <b>Notes App</b> 🧧
+        </p>
+
+        <p>
+          Please confirm your email for Resettig Password.
+        </p>
+
+        <a href="${verifyLink}" 
+          style="
+            display: inline-block;
+            padding: 10px 16px;
+            background-color: #16a34a;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 10px;
+          ">
+          Reset Password
+        </a>
+
+        <p style="margin-top: 20px;">
+          If you don't want to reset your password, you can safely ignore this email.
+        </p>
+
+        <hr style="margin: 20px 0;" />
+
+        <p style="font-size: 12px; color: #777;">
+          — Notes App Team
+        </p>
+
+      </div>
+      `,
+    });
+
+    console.log("✅ Reset password email sent");
+  } catch (error) {
+    console.error("❌ Reset password email error:", error.message);
+    throw error;
+  }
+};

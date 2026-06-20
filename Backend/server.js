@@ -6,6 +6,7 @@ import {
   LoginUser,
   getMe,
   verify_email,
+  forgotPassword,
 } from "./controllers/authcontroller.js";
 import protect from "./middlewares/authMiddleware.js";
 
@@ -23,7 +24,9 @@ app.get("/", (req, res) => {
 app.post("/register", registerUser);
 app.post("/login", LoginUser);
 app.get("/me", protect, getMe);
-app.get("/verify-email",verify_email)
+app.get("/verify-email", verify_email);
+app.post("/forgot-password", forgotPassword);
+app.get("/reset-password")
 
 app.listen(port, async () => {
   await connectDB();

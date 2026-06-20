@@ -5,7 +5,10 @@ import { toUSVString } from "util";
 import generateToken from "../utils/generateToken.js";
 import { get } from "http";
 import asyncHandler from "../middlewares/asyncHandler.js";
-import { sendVerificationEmail } from "../utils/SendEmail.js";
+import {
+  resetPasswordEmail,
+  sendVerificationEmail,
+} from "../utils/SendEmail.js";
 
 const app = express();
 
@@ -142,25 +145,36 @@ export const verify_email = asyncHandler(async (req, res, next) => {
 
 // ================= forgot-password ============
 export const forgotPassword = asyncHandler(async (req, res, next) => {
-  const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-  // const normalizedEmail = email.toLowerCase();
-  // const user = await User.findOne({ email: normalizedEmail });
+    // const normalizedEmail = email.toLowerCase();
+    // const user = await User.findOne({ email: normalizedEmail });
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.status(404).json({
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    ((user.resetPasswordToken = token),
+      (user.resetPasswordExpire = Date.now() + 10 * 60 * 1000));
+
+    await user.save();
+
+    // sending email to the user for resetting password
+    await resetPasswordEmail(user.email, token);
+
+    res.status(200).json({
+      message: "forgot password email sent successful.",
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      message: "User not found",
+      message: "something goes wrong with backend. can't send email",
     });
   }
-
-  const token = crypto.randomBytes(32).toString("hex");
-  user.resetPasswordToken = token,
-  user.resetPasswordExpire = Date.now()+10*60*1000;
-
-  await user.save();
-  res.status(200).json({
-    message: "forgot password successful.",
-  });
 });
