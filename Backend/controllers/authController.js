@@ -139,3 +139,28 @@ export const verify_email = asyncHandler(async (req, res, next) => {
     message: "Email verified successfully",
   });
 });
+
+// ================= forgot-password ============
+export const forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  // const normalizedEmail = email.toLowerCase();
+  // const user = await User.findOne({ email: normalizedEmail });
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+  user.resetPasswordToken = token,
+  user.resetPasswordExpire = Date.now()+10*60*1000;
+
+  await user.save();
+  res.status(200).json({
+    message: "forgot password successful.",
+  });
+});
