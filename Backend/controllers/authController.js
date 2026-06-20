@@ -1,16 +1,11 @@
-import express from "express";
 import User from "../models/User.js";
 import crypto from "crypto";
-import { toUSVString } from "util";
 import generateToken from "../utils/generateToken.js";
-import { get } from "http";
 import asyncHandler from "../middlewares/asyncHandler.js";
 import {
   resetPasswordEmail,
   sendVerificationEmail,
 } from "../utils/SendEmail.js";
-
-const app = express();
 
 export const registerUser = async (req, res) => {
   try {
@@ -148,10 +143,15 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
   try {
     const { email } = req.body;
 
-    // const normalizedEmail = email.toLowerCase();
-    // const user = await User.findOne({ email: normalizedEmail });
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter your email",
+      });
+    }
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -159,16 +159,20 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
       });
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
-    ((user.resetPasswordToken = token),
-      (user.resetPasswordExpire = Date.now() + 10 * 60 * 1000));
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
     await user.save();
-
-    // sending email to the user for resetting password
-    await resetPasswordEmail(user.email, token);
+    await resetPasswordEmail(user.email, resetToken);
 
     res.status(200).json({
+      success: true,
       message: "forgot password email sent successful.",
     });
   } catch (error) {
@@ -177,4 +181,40 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
       message: "something goes wrong with backend. can't send email",
     });
   }
+});
+
+//  !!==================== Reset-Password ====================!!
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const token = req.query.token || req.body.token;
+  const { password } = req.body;
+
+  if (!token || !password) {
+    res.status(400);
+    throw new Error("Token and password are required");
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    res.status(400);
+    throw new Error("invalid or expired token");
+  }
+
+  if (password.length < 8) {
+    res.status(400);
+    throw new Error("Password must be at least 8 characters");
+  }
+
+  user.password = password;
+  user.resetPasswordToken = null;
+  user.resetPasswordExpire = null;
+
+  await user.save();
+  res.json({ success: true, message: "Password reset successful" });
 });

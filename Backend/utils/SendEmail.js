@@ -95,7 +95,7 @@ export const resetPasswordEmail = async (email, token) => {
 
   const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
   try {
-    const verifyLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+    const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
     console.log(process.env.BREVO_API_KEY);
     console.log("📨 Sending reset password verification email...");
 
@@ -128,7 +128,7 @@ export const resetPasswordEmail = async (email, token) => {
           Please confirm your email for Resettig Password.
         </p>
 
-        <a href="${verifyLink}" 
+        <a href="${resetLink}" 
           style="
             display: inline-block;
             padding: 10px 16px;

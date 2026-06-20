@@ -7,7 +7,8 @@ import {
   getMe,
   verify_email,
   forgotPassword,
-} from "./controllers/authcontroller.js";
+  resetPassword,
+} from "./controllers/authController.js";
 import protect from "./middlewares/authMiddleware.js";
 
 dotenv.config();
@@ -26,7 +27,7 @@ app.post("/login", LoginUser);
 app.get("/me", protect, getMe);
 app.get("/verify-email", verify_email);
 app.post("/forgot-password", forgotPassword);
-app.get("/reset-password")
+app.post("/reset-password", resetPassword);
 
 app.listen(port, async () => {
   await connectDB();
